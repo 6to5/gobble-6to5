@@ -18,7 +18,7 @@ function babel(inputdir, outputdir, opts) {
 			return sander.readFile(inputdir, filename).then(function(code) {
 				if (opts.importHelpers) {
 					var hf = slashes(filename) + '__babelHelpers.js';
-					code = 'import babelHelpers from "' + hf + '";\n' + code;
+					code = 'import {babelHelpers} from "' + hf + '";\n' + code;
 				}
 				var fileOpts = objectAssign({}, opts, {
 					filename: inputdir + '/' + filename,
@@ -39,7 +39,7 @@ function babel(inputdir, outputdir, opts) {
 		}).then(function() {
 			if (opts.importHelpers) {
 				var code = babelc.buildExternalHelpers(usedHelpers, 'var');
-				code = code + '\nexport default babelHelpers;';
+				code = "export " + code;
 				return sander.writeFile(outputdir, '__babelHelpers.js', code);
 			}
 		});
