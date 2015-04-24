@@ -2,7 +2,8 @@ var babelc = require('babel-core');
 var resolveRc = require('babel-core/lib/babel/tools/resolve-rc')
 var sander = require('sander');
 var mapSeries = require('promise-map-series');
-var objectAssign = require('object-assign');
+var assign = require('lodash/object/assign');
+var merge = require('lodash/object/merge');
 var path = require('path');
 
 module.exports = babel;
@@ -24,7 +25,7 @@ function babel(inputdir, outputdir, opts) {
 					var hf = slashes(filename) + '__babelHelpers.js';
 					code = 'import {babelHelpers} from "' + hf + '";\n' + code;
 				}
-				var result = babelc.transform(code, objectAssign({}, opts, {
+				var result = babelc.transform(code, assign({}, opts, {
 					filename: inputdir + '/' + filename
 				}));
 				if (importHelpers) {
@@ -52,15 +53,30 @@ function slashes(from) {
 
 function buildHelpers(usedHelpers, opts) {
 	var helpers1 = babelc.buildExternalHelpers(usedHelpers, "var");
+	opts = merge({}, opts, {
+		externalHelpers: true,
+		metadataUsedHelpers: true,
+		blacklist: ["strict", "es6.tailCall"]
+	}, mergeCustom);
 	addUniqueHelpers(usedHelpers,
-		babelc.transform(helpers1, objectAssign({}, opts, {
-			externalHelpers: true,
-			metadataUsedHelpers: true
-		})).metadata.usedHelpers
+		babelc.transform(helpers1, opts).metadata.usedHelpers
 	);
 	delete opts.metadataUsedHelpers;
 	var helpers2 = babelc.buildExternalHelpers(usedHelpers, "var");
 	return "export " + babelc.transform(helpers2, opts).code;
+}
+
+function mergeCustom(a, b) {
+	if (Array.isArray(a)) {
+		var c = a.slice(0);
+		for (var i = b.length - 1; i >= 0; i--) {
+			var v = b[i];
+			if (c.indexOf(v) < 0) {
+				c.push(v);
+			}
+		}
+		return c;
+	}
 }
 
 function addUniqueHelpers(dest, src) {
