@@ -10,7 +10,7 @@ function babel ( code, options ) {
 
 	// apply .babelrc files
 	process.chdir( dirname( this.src ) );
-	rc( 'babel', options );
+	rc( 'babel', options, {} );
 	process.chdir( cwd );
 
 	delete options.config;
