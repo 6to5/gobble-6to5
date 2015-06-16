@@ -1,5 +1,5 @@
 var babelc = require('babel-core');
-var resolveRc = require('babel-core/lib/babel/tools/resolve-rc')
+var resolveRc = require('babel-core/transformation/file/options/resolve-rc')
 var sander = require('sander');
 var mapSeries = require('promise-map-series');
 var assign = require('lodash/object/assign');
