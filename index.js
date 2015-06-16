@@ -1,5 +1,5 @@
 var babelc = require('babel-core');
-var resolveRc = require('babel-core/transformation/file/options/resolve-rc')
+var resolveRc = require('babel-core/lib/babel/transformation/file/options/resolve-rc')
 var sander = require('sander');
 var mapSeries = require('promise-map-series');
 var assign = require('lodash/object/assign');
@@ -12,7 +12,6 @@ function babel(inputdir, outputdir, opts) {
 	importHelpers = !!opts.importHelpers;
 	if (importHelpers) {
 		opts.externalHelpers = true;
-		opts.metadataUsedHelpers = true;
 	}
 	delete opts.importHelpers;
 	resolveRc(inputdir, opts);
@@ -55,13 +54,11 @@ function buildHelpers(usedHelpers, opts) {
 	var helpers1 = babelc.buildExternalHelpers(usedHelpers, "var");
 	opts = merge({}, opts, {
 		externalHelpers: true,
-		metadataUsedHelpers: true,
 		blacklist: ["strict", "es6.tailCall"]
 	}, mergeCustom);
 	addUniqueHelpers(usedHelpers,
 		babelc.transform(helpers1, opts).metadata.usedHelpers
 	);
-	delete opts.metadataUsedHelpers;
 	var helpers2 = babelc.buildExternalHelpers(usedHelpers, "var");
 	return "export " + babelc.transform(helpers2, opts).code;
 }
