@@ -1,4 +1,4 @@
-var transform = require( 'babel-core' ).transform;
+var babelCore = require( 'babel-core' );
 var dirname = require( 'path' ).dirname;
 
 module.exports = babel;
@@ -9,7 +9,13 @@ function babel ( code, options ) {
 	// trigger use of .babelrc
 	options.filename = this.src;
 
-	return transform( code, options );
+	var result = babelCore.transform( code, options );
+
+	if ( options.externalHelpers ) {
+		var helpers = babelCore.buildExternalHelpers( result.metadata.usedHelpers );
+		result.write( helpers );
+	}
+	return result;
 }
 
 babel.defaults = {
