@@ -13,7 +13,7 @@ function babel ( code, options ) {
 
 	if ( options.externalHelpers ) {
 		var helpers = babelCore.buildExternalHelpers( result.metadata.usedHelpers );
-		result.code = helpers + '\n\n' + result.code;
+		result.write( helpers );
 	}
 	return result;
 }
