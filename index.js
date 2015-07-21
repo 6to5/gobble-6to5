@@ -1,5 +1,4 @@
 var babelc = require('babel-core');
-var resolveRc = require('babel-core/lib/babel/transformation/file/options/resolve-rc')
 var sander = require('sander');
 var mapSeries = require('promise-map-series');
 var assign = require('lodash/object/assign');
@@ -14,7 +13,6 @@ function babel(inputdir, outputdir, opts) {
 		opts.externalHelpers = true;
 	}
 	delete opts.importHelpers;
-	resolveRc(inputdir, opts);
 	return sander.lsr(inputdir).then(function(allFiles) {
 		allFiles = allFiles.filter(extFilter);
 		var usedHelpers = [];
@@ -34,6 +32,13 @@ function babel(inputdir, outputdir, opts) {
 			});
 		}).then(function() {
 			if (importHelpers) {
+				// NOTE: This is broken because .babelrc options wont be inherited
+				//       when building the helpers. This is because babel can
+				//       consider different options for different files transformed,
+				//       which is unfortunate because external babel helpers
+				//       won't be "correct" unless the same options are used
+				//       for every file. As a work around just copy options from
+				//       .babelrc into the gobblefile.
 				var code = buildHelpers(usedHelpers, opts);
 				return sander.writeFile(outputdir, '__babelHelpers.js', code);
 			}
